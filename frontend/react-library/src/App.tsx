@@ -4,7 +4,7 @@ import {Navbar} from "./layouts/NavbarAndFooter/Navbar";
 
 function App() {
     return (
-        <div></div>
+        <Navbar/>
     );
 }
 
