@@ -19,10 +19,10 @@ export const App = () => {
                     <Route path="/home">
                         <HomePage/>
                     </Route>
-                    <Route path='/search/:bookId'>
+                    <Route path='/search'>
                         <SearchBooksPage/>
                     </Route>
-                    <Route path='/checkout'>
+                    <Route path='/checkout/:bookId'>
                         <BookCheckoutPage/>
                     </Route>
                 </Switch>
