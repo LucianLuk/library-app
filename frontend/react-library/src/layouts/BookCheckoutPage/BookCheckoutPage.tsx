@@ -5,6 +5,7 @@ import {SpinnerLoading} from "../Util/SpinnerLoading";
 import {StarReview} from "../Util/StarReview";
 import {CheckoutReviewBox} from "./CheckoutReviewBox";
 import ReviewModel from "../../models/ReviewModel";
+import {LatestReviews} from "./LatestReviews";
 
 export const BookCheckoutPage = () => {
 
@@ -127,6 +128,7 @@ export const BookCheckoutPage = () => {
                     <CheckoutReviewBox book={book} mobile={false}/>
                 </div>
                 <hr/>
+                <LatestReviews reviews={reviews} bookId={book?.id} mobile={false}/>
             </div>
             <div className='container d-lg-none mt-5'>
                 <div className='d-flex justify-content-center align-items-center'>
@@ -148,6 +150,7 @@ export const BookCheckoutPage = () => {
                 </div>
                 <CheckoutReviewBox book={book} mobile={true}/>
                 <hr/>
+                <LatestReviews reviews={reviews} bookId={book?.id} mobile={true}/>
             </div>
         </div>
     );
