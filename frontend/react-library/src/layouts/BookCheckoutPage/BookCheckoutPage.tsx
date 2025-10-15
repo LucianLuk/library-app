@@ -75,7 +75,6 @@ export const BookCheckoutPage = () => {
             }
 
             if (loadedReviews) {
-                // TODO 處理顯示 Stars 的邏輯
                 const round = (Math.round((weightedStarReviews / loadedReviews.length) * 100) / 100);
                 setTotalStars(Number(round));
             }
@@ -122,7 +121,7 @@ export const BookCheckoutPage = () => {
                             <h2>{book?.title}</h2>
                             <h5 className='text-primary'>{book?.author}</h5>
                             <p className='lead'>{book?.description}</p>
-                            <StarReview Rating={4.5} size={32}/>
+                            <StarReview Rating={totalStars} size={32}/>
                         </div>
                     </div>
                     <CheckoutReviewBox book={book} mobile={false}/>
@@ -145,7 +144,7 @@ export const BookCheckoutPage = () => {
                         <h2>{book?.title}</h2>
                         <h5 className='text-primary'>{book?.author}</h5>
                         <p className='lead'>{book?.description}</p>
-                        <StarReview Rating={4.5} size={32}/>
+                        <StarReview Rating={totalStars} size={32}/>
                     </div>
                 </div>
                 <CheckoutReviewBox book={book} mobile={true}/>
