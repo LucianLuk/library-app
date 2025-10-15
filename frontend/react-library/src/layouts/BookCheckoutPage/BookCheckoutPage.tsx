@@ -4,12 +4,18 @@ import BookModel from "../../models/BookModel";
 import {SpinnerLoading} from "../Util/SpinnerLoading";
 import {StarReview} from "../Util/StarReview";
 import {CheckoutReviewBox} from "./CheckoutReviewBox";
+import ReviewModel from "../../models/ReviewModel";
 
 export const BookCheckoutPage = () => {
 
     const [book, setBook] = useState<bookModel>();
     const [isLoading, setIsLoading] = useState(true);
     const [httpError, setHttpError] = useState(null);
+
+    // Review State
+    const [reviews, setReviews] = useState<ReviewModel[]>([]);
+    const [totalStars, setTotalStars] = useState(0);
+    const [isLoadingReviews, setIsLoadingReviews] = useState(true);
 
     const bookId = (window.location.pathname).split('/')[2];
 
@@ -40,7 +46,50 @@ export const BookCheckoutPage = () => {
         })
     }, []);
 
-    if (isLoading) {
+    useEffect(() => {
+        const fetchBookReviews = async () => {
+            const reviewUrl: string = `http://localhost:8080/api/reviews/search/findByBookId?bookId=${bookId}`;
+
+            const responseReviews = await fetch(reviewUrl);
+
+            if (!responseReviews.ok) {
+                throw new Error('Something went wrong!');
+            }
+
+            const responseJsonReviews = await responseReviews.json();
+            const responseData = responseJsonReviews._embedded.reviews;
+            const loadedReviews: ReviewModel[] = [];
+            let weightedStarReviews: number = 0;
+
+            for (const key in responseData) {
+                loadedReviews.push({
+                    id: responseData[key].id,
+                    book_id: responseData[key].bookId,
+                    userEmail: responseData[key].userEmail,
+                    date: responseData[key].date,
+                    rating: responseData[key].rating,
+                    reviewDescription: responseData[key].reviewDescription
+                });
+                weightedStarReviews += responseData[key].rating;
+            }
+
+            if (loadedReviews) {
+                // TODO 處理顯示 Stars 的邏輯
+                const round = (Math.round((weightedStarReviews / loadedReviews.length) * 100) / 100);
+                setTotalStars(Number(round));
+            }
+
+            setReviews(loadedReviews);
+            setIsLoadingReviews(false);
+        };
+
+        fetchBookReviews().catch((error: any) => {
+            setIsLoadingReviews(false);
+            setHttpError(error.message);
+        });
+    }, []);
+
+    if (isLoading || isLoadingReviews) {
         return (
             <SpinnerLoading/>
         );
