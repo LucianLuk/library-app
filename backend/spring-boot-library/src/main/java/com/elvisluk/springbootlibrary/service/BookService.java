@@ -45,4 +45,10 @@ public class BookService {
 
         return book;
     }
+
+    public Boolean isBookCheckedOutByUser(String userEmail, Long bookId) {
+        Checkout validateCheckout = checkoutRepository.findByUserEmailAndBookId(userEmail, bookId);
+        return validateCheckout != null;
+    }
 }
+
