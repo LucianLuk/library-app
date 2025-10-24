@@ -2,6 +2,7 @@ package com.elvisluk.springbootlibrary.controller;
 
 import com.elvisluk.springbootlibrary.entity.Book;
 import com.elvisluk.springbootlibrary.service.BookService;
+import com.elvisluk.springbootlibrary.utils.ExtractJWT;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -19,20 +20,22 @@ public class BookController {
     }
 
     @PutMapping("/secure/checkout")
-    public Book checkoutBook(@RequestParam Long bookId) throws Exception {
-        String userEmail = "testuser@email.com";
+    public Book checkoutBook(@RequestHeader("Authorization") String token,
+                             @RequestParam Long bookId) throws Exception {
+        String userEmail = ExtractJWT.payloadJWTExtraction(token);
         return bookService.checkoutBook(userEmail, bookId);
     }
 
     @GetMapping("/secure/isBookCheckedOutByUser")
-    public Boolean isBookCheckedOutByUser(@RequestParam Long bookId) {
-        String userEmail = "testuser@email.com";
+    public Boolean isBookCheckedOutByUser(@RequestHeader("Authorization") String token,
+                                          @RequestParam Long bookId) {
+        String userEmail = ExtractJWT.payloadJWTExtraction(token);
         return bookService.isBookCheckedOutByUser(userEmail, bookId);
     }
 
     @GetMapping("/secure/currentLoans/count")
-    public int currentLoansCount() {
-        String userEmail = "testuser@email.com";
+    public int currentLoansCount(@RequestHeader("Authorization") String token) {
+        String userEmail = ExtractJWT.payloadJWTExtraction(token);
         return bookService.currentLoansCount(userEmail);
     }
 }
