@@ -20,6 +20,7 @@ public class SpringBootLibraryApplication {
 		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowCredentials(true);
 		config.addAllowedOrigin("http://172.23.193.208:3000");
+		config.addAllowedOrigin("http://localhost:3000");
 		config.addAllowedHeader("*");
 		config.addAllowedMethod("*");
 		source.registerCorsConfiguration("/**", config);
