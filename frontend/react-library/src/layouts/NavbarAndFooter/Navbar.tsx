@@ -10,10 +10,8 @@ export const Navbar = () => {
         return <SpinnerLoading/>;
     }
 
-    authState.isAuthenticated = true;
-
+    //authState.isAuthenticated = false;
     const handleLogout = async () => oktaAuth.signOut();
-
 
     console.log(authState);
 
