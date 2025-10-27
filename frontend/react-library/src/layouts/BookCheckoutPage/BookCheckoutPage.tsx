@@ -7,6 +7,7 @@ import {CheckoutReviewBox} from "./CheckoutReviewBox";
 import ReviewModel from "../../models/ReviewModel";
 import {LatestReviews} from "./LatestReviews";
 import {useOktaAuth} from "@okta/okta-react";
+import ReviewRequestModel from "../../models/ReviewRequestModel";
 
 export const BookCheckoutPage = () => {
 
@@ -101,7 +102,7 @@ export const BookCheckoutPage = () => {
             setIsLoadingReviews(false);
             setHttpError(error.message);
         });
-    }, []);
+    }, [isReviewSubmitted]);
 
     useEffect(() => {
         const fetchUserReviewBook = async () => {
@@ -213,6 +214,29 @@ export const BookCheckoutPage = () => {
         setIsBookCheckedOut(true);
     }
 
+    async function submitReview(starInput: number, reviewDescriptionInput: string) {
+        let bookId: number = 0;
+        if (book?.id) {
+            bookId = book.id;
+        }
+
+        const reviewRequestModel = new ReviewRequestModel(starInput, bookId, reviewDescriptionInput);
+        const submitReviewUrl: string = `http://localhost:8080/api/reviews/secure/postReview`;
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${authState?.accessToken?.accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(reviewRequestModel)
+        };
+        const submitReviewResponse = await fetch(submitReviewUrl, requestOptions);
+        if (!submitReviewResponse.ok) {
+            throw new Error('Something went wrong!');
+        }
+        setIsReviewSubmitted(true);
+    }
+
     return (
         <div>
             <div className='container d-none d-lg-block'>
@@ -238,7 +262,8 @@ export const BookCheckoutPage = () => {
                                        isAuthenticated={authState?.isAuthenticated}
                                        isBookCheckedOut={isBookCheckedOut}
                                        checkoutBook={checkoutBook}
-                                       isReviewSubmitted={isReviewSubmitted}/>
+                                       isReviewSubmitted={isReviewSubmitted}
+                                       submitReview={submitReview}/>
                 </div>
                 <hr/>
                 <LatestReviews reviews={reviews} bookId={book?.id} mobile={false}/>
@@ -265,7 +290,8 @@ export const BookCheckoutPage = () => {
                                    isAuthenticated={authState?.isAuthenticated}
                                    isBookCheckedOut={isBookCheckedOut}
                                    checkoutBook={checkoutBook}
-                                   isReviewSubmitted={isReviewSubmitted}/>
+                                   isReviewSubmitted={isReviewSubmitted}
+                                   submitReview={submitReview}/>
                 <hr/>
                 <LatestReviews reviews={reviews} bookId={book?.id} mobile={true}/>
             </div>
