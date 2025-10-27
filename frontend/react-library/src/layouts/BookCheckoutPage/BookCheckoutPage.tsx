@@ -29,6 +29,9 @@ export const BookCheckoutPage = () => {
     const [isBookCheckedOut, setIsBookCheckedOut] = useState(false);
     const [isLoadingIsBookCheckedOut, setIsLoadingIsBookCheckedOut] = useState(true);
 
+    const [isReviewSubmitted, setIsReviewSubmitted] = useState(false);
+    const [isLoadingUserReview, setIsLoadingUserReview] = useState(true);
+
     const bookId = (window.location.pathname).split('/')[2];
 
     useEffect(() => {
@@ -101,6 +104,32 @@ export const BookCheckoutPage = () => {
     }, []);
 
     useEffect(() => {
+        const fetchUserReviewBook = async () => {
+            if (authState && authState.isAuthenticated) {
+                const url = `http://localhost:8080/api/reviews/secure/user/book?bookId=${bookId}`;
+                const requestOptions = {
+                    method: 'GET',
+                    headers: {
+                        Authorization: `Bearer ${authState.accessToken?.accessToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+                const userReviewResponse = await fetch(url, requestOptions);
+                if (!userReviewResponse.ok) {
+                    throw new Error('Something went wrong!');
+                }
+                const userReviewResponseJson = await userReviewResponse.json();
+                setIsReviewSubmitted(userReviewResponseJson);
+            }
+            setIsLoadingUserReview(false);
+        };
+        fetchUserReviewBook().catch((error: any) => {
+            setIsLoadingUserReview(false);
+            setHttpError(error.message);
+        });
+    }, [authState])
+
+    useEffect(() => {
         const fetchUserCurrentLoansCount = async () => {
             if (authState && authState.isAuthenticated) {
                 const loansCountUrl: string = `http://localhost:8080/api/books/secure/currentLoans/count`;
@@ -154,7 +183,7 @@ export const BookCheckoutPage = () => {
         });
     }, [authState]);
 
-    if (isLoading || isLoadingReviews || isLoadingCurrentLoansCount || isLoadingIsBookCheckedOut) {
+    if (isLoading || isLoadingReviews || isLoadingCurrentLoansCount || isLoadingIsBookCheckedOut || isLoadingUserReview) {
         return (
             <SpinnerLoading/>
         );
@@ -208,7 +237,8 @@ export const BookCheckoutPage = () => {
                     <CheckoutReviewBox book={book} mobile={false} currentLoansCount={currentLoansCount}
                                        isAuthenticated={authState?.isAuthenticated}
                                        isBookCheckedOut={isBookCheckedOut}
-                                       checkoutBook={checkoutBook}/>
+                                       checkoutBook={checkoutBook}
+                                       isReviewSubmitted={isReviewSubmitted}/>
                 </div>
                 <hr/>
                 <LatestReviews reviews={reviews} bookId={book?.id} mobile={false}/>
@@ -234,7 +264,8 @@ export const BookCheckoutPage = () => {
                 <CheckoutReviewBox book={book} mobile={true} currentLoansCount={currentLoansCount}
                                    isAuthenticated={authState?.isAuthenticated}
                                    isBookCheckedOut={isBookCheckedOut}
-                                   checkoutBook={checkoutBook}/>
+                                   checkoutBook={checkoutBook}
+                                   isReviewSubmitted={isReviewSubmitted}/>
                 <hr/>
                 <LatestReviews reviews={reviews} bookId={book?.id} mobile={true}/>
             </div>
