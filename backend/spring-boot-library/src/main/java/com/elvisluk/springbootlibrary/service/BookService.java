@@ -87,5 +87,40 @@ public class BookService {
         }
         return currenLoans;
     }
+
+    public void returnBook(String userEmail, Long bookId) throws Exception {
+        Optional<Book> book = bookRepository.findById(bookId);
+        Checkout validateCheckout = checkoutRepository.findByUserEmailAndBookId(userEmail, bookId);
+
+        if (!book.isPresent() || validateCheckout == null) {
+            throw new Exception("Book does not exist or not checked out by user");
+        }
+
+        book.get().setCopiesAvailable(book.get().getCopiesAvailable() + 1);
+
+        bookRepository.save(book.get());
+        checkoutRepository.deleteById(validateCheckout.getId());
+    }
+
+    public void renewLoan(String userEmail, Long bookId) throws Exception {
+        Checkout validateCheckout = checkoutRepository.findByUserEmailAndBookId(userEmail, bookId);
+
+        if (validateCheckout == null) {
+            throw new Exception("Book does not exist or not checked out by user");
+        }
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        Date returnDate = simpleDateFormat.parse(validateCheckout.getReturnDate());
+        Date todayDate = simpleDateFormat.parse(LocalDate.now().toString());
+
+        if (returnDate.compareTo(todayDate) >= 0) {
+            validateCheckout.setReturnDate(LocalDate.now().plusDays(7).toString());
+            checkoutRepository.save(validateCheckout);
+        } else {
+            throw new Exception("Cannot renew loan for overdue book");
+        }
+    }
+
 }
 
