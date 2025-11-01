@@ -27,6 +27,11 @@ export const Footer = () => {
                             Online Shop
                         </Link>
                     </li>
+                    <li className='nav-item'>
+                        <Link to='/messages' className='nav-link px-2 text-white'>
+                            Q/A
+                        </Link>
+                    </li>
                 </ul>
             </footer>
         </div>
