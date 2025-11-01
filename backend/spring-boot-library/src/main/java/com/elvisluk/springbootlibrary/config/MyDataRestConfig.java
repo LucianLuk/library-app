@@ -1,6 +1,7 @@
 package com.elvisluk.springbootlibrary.config;
 
 import com.elvisluk.springbootlibrary.entity.Book;
+import com.elvisluk.springbootlibrary.entity.Message;
 import com.elvisluk.springbootlibrary.entity.Review;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
@@ -25,9 +26,11 @@ public class MyDataRestConfig implements RepositoryRestConfigurer {
 
         config.exposeIdsFor(Book.class);
         config.exposeIdsFor(Review.class);
+        config.exposeIdsFor(Message.class);
 
         disableHttpMethods(Book.class, config, theUnsupportedActions);
         disableHttpMethods(Review.class, config, theUnsupportedActions);
+        disableHttpMethods(Message.class, config, theUnsupportedActions);
 
         /* Configure CORS Mapping */
         corsRegistry.addMapping(config.getBasePath() + "/**")
