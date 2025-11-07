@@ -21,7 +21,7 @@ export const Messages = () => {
     useEffect(() => {
         const fetchUserMessages = async () => {
             if (authState && authState?.isAuthenticated) {
-                const fetchURL = `http://localhost:8080/api/messages/search/findByUserEmail/?userEmail=${authState?.accessToken?.claims.sub}&page=${currentPage - 1}&size=${messagesPerPage}`;
+                const fetchURL = `${process.env.REACT_APP_API}/messages/search/findByUserEmail/?userEmail=${authState?.accessToken?.claims.sub}&page=${currentPage - 1}&size=${messagesPerPage}`;
                 const requestOptions = {
                     method: "GET",
                     headers: {
