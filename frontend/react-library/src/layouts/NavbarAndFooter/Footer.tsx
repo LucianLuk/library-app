@@ -18,18 +18,8 @@ export const Footer = () => {
                         </Link>
                     </li>
                     <li className='nav-item'>
-                        <Link to='/shelf' className='nav-link px-2 text-white'>
-                            Shelf
-                        </Link>
-                    </li>
-                    <li className='nav-item'>
                         <Link to='/shop' className='nav-link px-2 text-white'>
                             Online Shop
-                        </Link>
-                    </li>
-                    <li className='nav-item'>
-                        <Link to='/messages' className='nav-link px-2 text-white'>
-                            Q/A
                         </Link>
                     </li>
                 </ul>
