@@ -3,9 +3,11 @@ package com.elvisluk.springbootlibrary.service;
 import com.elvisluk.springbootlibrary.dao.BookRepository;
 import com.elvisluk.springbootlibrary.dao.CheckoutRepository;
 import com.elvisluk.springbootlibrary.dao.HistoryRepository;
+import com.elvisluk.springbootlibrary.dao.PaymentRepository;
 import com.elvisluk.springbootlibrary.entity.Book;
 import com.elvisluk.springbootlibrary.entity.Checkout;
 import com.elvisluk.springbootlibrary.entity.History;
+import com.elvisluk.springbootlibrary.entity.Payment;
 import com.elvisluk.springbootlibrary.responseModel.ShelfCurrentLoansResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,11 +27,14 @@ public class BookService {
 
     private HistoryRepository historyRepository;
 
+    private PaymentRepository paymentRepository;
+
     public BookService(BookRepository bookRepository, CheckoutRepository checkoutRepository,
-                       HistoryRepository historyRepository) {
+                       HistoryRepository historyRepository, PaymentRepository paymentRepository) {
         this.bookRepository = bookRepository;
         this.checkoutRepository = checkoutRepository;
         this.historyRepository = historyRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     public Book checkoutBook(String userEmail, Long bookId) throws Exception {
@@ -38,6 +43,35 @@ public class BookService {
 
         if (!bookOptional.isPresent() || validateCheckout != null || bookOptional.get().getCopiesAvailable() <= 0) {
             throw new Exception("Book cannot be checked out because it is either not available or already checked out by the user.");
+        }
+
+        List<Checkout> currentBooksCheckedOut = checkoutRepository.findBooksByUserEmail(userEmail);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        boolean bookNeedsReturned = false;
+        for (Checkout checkout : currentBooksCheckedOut) {
+            Date returnDate = simpleDateFormat.parse(checkout.getReturnDate());
+            Date todayDate = simpleDateFormat.parse(LocalDate.now().toString());
+            TimeUnit timeUnit = TimeUnit.DAYS;
+            double differenceInTime =
+                    timeUnit.convert(returnDate.getTime() - todayDate.getTime(), TimeUnit.MILLISECONDS);
+            if (differenceInTime < 0) {
+                bookNeedsReturned = true;
+                break;
+            }
+        }
+
+        Payment userPayment = paymentRepository.findByUserEmail(userEmail);
+
+        if ((userPayment != null && userPayment.getAmount() > 0)
+                || (userPayment != null && bookNeedsReturned)) {
+            throw new Exception("Outstanding fees!");
+        }
+
+        if (userPayment == null) {
+            Payment payment = new Payment();
+            payment.setAmount(00.00);
+            payment.setUserEmail(userEmail);
+            paymentRepository.save(payment);
         }
 
         // TODO - solve concurrency issue when two users try to check out the last available copy of a book
@@ -105,6 +139,19 @@ public class BookService {
         book.get().setCopiesAvailable(book.get().getCopiesAvailable() + 1);
 
         bookRepository.save(book.get());
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date returnDate = simpleDateFormat.parse(validateCheckout.getReturnDate());
+        Date todayDate = simpleDateFormat.parse(LocalDate.now().toString());
+        TimeUnit timeUnit = TimeUnit.DAYS;
+        double differenceInTime =
+                timeUnit.convert(returnDate.getTime() - todayDate.getTime(), TimeUnit.MILLISECONDS);
+        if (differenceInTime < 0) {
+            Payment payment = paymentRepository.findByUserEmail(userEmail);
+            payment.setAmount(payment.getAmount() + (differenceInTime * -1));
+            paymentRepository.save(payment);
+        }
+
         checkoutRepository.deleteById(validateCheckout.getId());
 
         History history = new History(
