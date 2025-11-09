@@ -62,16 +62,16 @@ public class BookService {
 
         Payment userPayment = paymentRepository.findByUserEmail(userEmail);
 
-        if ((userPayment != null && userPayment.getAmount() > 0)
-                || (userPayment != null && bookNeedsReturned)) {
-            throw new Exception("Outstanding fees!");
-        }
-
         if (userPayment == null) {
             Payment payment = new Payment();
             payment.setAmount(00.00);
             payment.setUserEmail(userEmail);
             paymentRepository.save(payment);
+        }
+
+        if ((userPayment != null && userPayment.getAmount() > 0)
+                || (userPayment != null && bookNeedsReturned)) {
+            throw new Exception("Outstanding fees!");
         }
 
         // TODO - solve concurrency issue when two users try to check out the last available copy of a book
